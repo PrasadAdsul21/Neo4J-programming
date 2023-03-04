@@ -1,0 +1,131 @@
+Clothing Brand
+NODES
+
+Section
+create (s:Section {Name:"Male"}) return s;
+create (s:Section {Name:"Female"}) return s;
+create (s:Section {Name:"Kids"}) return s;
+
+Brand
+create (b:Brand {Name:"American Eagle"}) return b;
+create (b:Brand {Name:"Gap"}) return b;
+create (b:Brand {Name:"Peter England"}) return b;
+create (b:Brand {Name:"Levis"}) return b;
+create (b:Brand {Name:"Tommy Hilfiger"}) return b;
+
+
+Apparel
+create (a:Apparel {Name:"Kurta"}) return a;
+create (a:Apparel {Name:"Saree"}) return a;
+create (a:Apparel {Name:"T-Shirts"}) return a;
+create (a:Apparel {Name:"Jackets"}) return a;
+create (a:Apparel {Name:"Frock"}) return a;
+create (a:Apparel {Name:"Shirt"}) return a;
+create (a:Apparel {Name:"Trouser"}) return a;
+
+
+
+
+
+Size
+create (s:Size {Name:"S"}) return s;
+create (s:Size {Name:"M"}) return s;
+create (s:Size {Name:"L"}) return s;
+create (s:Size {Name:"XL"}) return s;
+create (s:Size {Name:"XXL"}) return s;
+
+SalesStaff
+create (ss:SalesStaff {Name:"Smita"}) return ss;
+create (ss:SalesStaff {Name:"Geeta"}) return ss;
+create (ss:SalesStaff {Name:"Seeta"}) return ss;
+create (ss:SalesStaff {Name:"Raman"}) return ss;
+
+Color
+create (c:Color{Name:"Red"}) return c;
+create (c:Color{Name:"Black"}) return c;
+create (c:Color{Name:"Blue"})  return c;
+
+
+RELATIONSHIPS
+
+Has
+match(s:Section),(a:Apparel) where s.Name="Female" and a.Name="Kurta" create (s)-[:Has]->(a) return s,a;
+
+match(s:Section),(a:Apparel) where s.Name="Female" and a.Name="Saree" create (s)-[:Has]->(a) return s,a;
+
+match(s:Section),(a:Apparel) where s.Name="Male" and a.Name="Jackets" create (s)-[:Has]->(a) return s,a;
+
+match(s:Section),(a:Apparel) where s.Name="Male" and a.Name="Shirt" create (s)-[:Has]->(a) return s,a;
+
+match(s:Section),(a:Apparel) where s.Name="Kids" and a.Name="Frock" create (s)-[:Has]->(a) return s,a;
+
+match(s:Section),(a:Apparel) where s.Name="Male" and a.Name="Trouser" create (s)-[:Has]->(a) return s,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Levis" and a.Name="Trouser" create (b)-[:Has]->(a) return b,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Levis" and a.Name="Shirt" create (b)-[:Has]->(a) return b,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Gap" and a.Name="Frock" create (b)-[:Has]->(a) return b,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Peter England" and a.Name="Jackets" create (b)-[:Has]->(a) return b,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Peter England" and a.Name="Shirt" create (b)-[:Has]->(a) return b,a;
+
+match(b:Brand),(a:Apparel) where b.Name="Peter England" and a.Name="Trouser" create (b)-[:Has]->(a) return b,a;
+
+Works_in
+match(ss:SalesStaff),(s:Section) where s.Name="Kids" and ss.Name="Smita" create (ss)-[:Work_in]->(s) return ss,s;
+
+match(ss:SalesStaff),(s:Section) where s.Name="Female" and ss.Name="Geeta" create (ss)-[:Work_in]->(s) return ss,s;
+
+match(ss:SalesStaff),(s:Section) where s.Name="Male" and ss.Name="Seeta" create (ss)-[:Work_in]->(s) return ss,s;
+
+match(ss:SalesStaff),(s:Section) where s.Name="Kids" and ss.Name="Raman" create (ss)-[:Work_in]->(s) return ss,s;
+
+Has_Color
+match,(a:Apparel),(c:Color) where a.Name="Trouser" and c.Name="Black" create (a)-[:Has_Color]->(c) return c,a;
+
+
+Available_in
+match(s:Size),(a:Apparel) where a.Name="Frock" and s.Name="S" create (a)-[:Available_in]->(s) return s,a;
+
+match(s:Size),(a:Apparel) where a.Name="Jackets" and s.Name="XXL" create (a)-[:Available_in]->(s) return s,a;
+
+match(s:Size),(a:Apparel) where a.Name="Shirt" and s.Name="M" create (a)-[:Available_in]->(s) return s,a;
+
+match(s:Size),(a:Apparel) where a.Name="Kurta" and s.Name="L" create (a)-[:Available_in]->(s) return s,a;
+
+match(s:Size),(a:Apparel) where a.Name="Saree" and s.Name="XL" create (a)-[:Available_in]->(s) return s,a;
+
+match(s:Size),(a:Apparel) where a.Name="Trouser" and s.Name="L" create (a)-[:Available_in]->(s) return s,a;
+
+
+
+QUERIES
+3.a
+match(s:Section),(a:Apparel) where s.Name="Female" and (s)-[:Has]->(a) return a.Name;
+Output :
+a.Name
+"Kurta"
+"Saree"
+3.b
+match(ss:SalesStaff),(s:Section) where s.Name="Kids" and (ss)-[:Work_in]->(s) return ss.Name;
+Output :
+ss.Name
+"Smita"
+"Raman"
+3.c
+match (a:Apparel {Name:"Trouser"}),(c:Color {Name:"Black"}),
+(ss:Section {Name:"Male"}),(s:Size) WHERE (a)-[:Available_in]->(s) AND
+ (a)-[:Has_Color]->(c) AND (ss)-[:Has]->(a) return s.Name,ss.Name,c.Name
+Output :
+s.Name	ss.Name	c.Name
+"L"	"Male"	"Black"
+3.d
+match(p:Brand)-[:Has]->(d:Apparel) with p.Name as names, count(d.Name) as count_vt WITH 
+collect({names:names,count_vt:count_vt}) as rows,
+min(count_vt) as min UNWIND [row in rows WHERE row.count_vt=min] as row 
+RETURN row.names,row.count_vt as count_vt
+Output :
+	row.names		count_vt
+	"Gap"		1
