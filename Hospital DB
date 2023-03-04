@@ -1,0 +1,112 @@
+Hospital
+
+
+NODES
+
+Hospital
+create (h:Hospital {Name:"Columbia Hospital"}) return h;
+create (h:Hospital {Name:"Bytco Hospital"}) return h;
+create (h:Hospital {Name:"Sahyadri Hospital"}) return h;
+create (h:Hospital {Name:"Jehangir Hospital"}) return h;
+
+Specialization
+create(s:Specialization{Name:"Pediatric"}) return s;
+create(s:Specialization{Name:"Orthopedic"}) return s;
+create(s:Specialization{Name:"Gynaec"}) return s;
+
+Person
+create (p:Person {Name:"Vishal"}) return p;
+create (p:Person {Name:"Radhika"}) return p;
+create (p:Person {Name:"Diya"}) return p;
+
+Doctor
+create (d:Doctor {Name:"Dr.Aarohi"}) return d;
+create (d:Doctor {Name:"Dr.Rohit"}) return d;
+create (d:Doctor {Name:"Dr.Vikas"}) return d;
+
+
+
+
+
+
+RELATIONSHIPS
+
+Visits
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Vikas" and h.Name="Jehangir Hospital" create (d)-[:Visits {Day:"Monday"}]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Aarohi" and h.Name="Jehangir Hospital" create (d)-[:Visits {Day: "Monday"}]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Vikas" and h.Name="Bytco Hospital" create (d)-[:Visits {Day: "Tuesday"}]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Rohit" and h.Name="Columbia Hospital" create (d)-[:Visits {Day: "Wednesday"}]->(h) return d,h;
+
+Rates
+match (p:Person),(h:Hospital) where p.Name="Vishal" and h.Name="Jehangir Hospital" create (p)-[:Rates {Rating:4.5}]->(h) return p,h;
+
+match (p:Person),(h:Hospital) where p.Name="Diya" and h.Name="Jehangir Hospital" create (p)-[:Rates {Rating:3}]->(h) return p,h;
+
+match (p:Person),(h:Hospital) where p.Name="Radhika" and h.Name="Jehangir Hospital" create (p)-[:Rates {Rating:2}]->(h) return p,h;
+
+match (p:Person),(h:Hospital) where p.Name="Diya" and h.Name="Columbia Hospital" create (p)-[:Rates {Rating:5}]->(h) return p,h;
+
+match (p:Person),(h:Hospital) where p.Name="Vishal" and h.Name="Bytco Hospital" create (p)-[:Rates {Rating:4.2}]->(h) return p,h;
+
+Specialized_in
+match(h:Hospital),(s:Specialization) where h.Name="Columbia Hospital" and s.Name="Gynaec" create (h)-[:Specialized_in]->(s) return h,s;
+
+match(h:Hospital),(s:Specialization) where h.Name="Sahyadri Hospital" and s.Name="Orthopedic" create (h)-[:Specialized_in]->(s) return h,s;
+
+match(h:Hospital),(s:Specialization) where h.Name="Bytco Hospital" and s.Name="Pediatric" create (h)-[:Specialized_in]->(s) return h,s;
+
+match(h:Hospital),(s:Specialization) where h.Name="Jehangir Hospital" and s.Name="Gynaec" create (h)-[:Specialized_in]->(s) return h,s;
+
+Recommends
+match(p:Person),(h:Hospital) where p.Name="Diya" and h.Name="Jehangir Hospital" create (p)-[:Recommends]->(h) return p,h;
+
+match(p:Person),(h:Hospital) where p.Name="Vishal" and h.Name="Jehangir Hospital" create (p)-[:Recommends]->(h) return p,h;
+
+match(p:Person),(h:Hospital) where p.Name="Radhika" and h.Name="Columbia Hospital" create (p)-[:Recommends]->(h) return p,h;
+
+match(p:Person),(h:Hospital) where p.Name="Radhika" and h.Name="Bytco Hospital" create (p)-[:Recommends]->(h) return p,h;
+
+Associated_with
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Rohit" and h.Name="Columbia Hospital" create (d)-[:Associated_with]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Rohit" and h.Name="Bytco Hospital" create (d)-[:Associated_with]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Aarohi" and h.Name="Columbia Hospital" create (d)-[:Associated_with]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Aarohi" and h.Name="Jehangir Hospital" create (d)-[:Associated_with]->(h) return d,h;
+
+match (d:Doctor),(h:Hospital) where d.Name="Dr.Vikas" and h.Name="Jehangir Hospital" create (d)-[:Associated_with]->(h) return d,h;
+
+
+
+
+
+QUERIES
+3.a
+match (h:Hospital),(r:Specialization) where r.Name="Pediatric" and (h)-[:Specialized_in]->(r) return h.Name
+Output :
+h.Name
+"Bytco Hospital"
+3.b
+match (d:Doctor)-[:Visits {Day:"Monday"}]->(h:Hospital {Name:"Jehangir Hospital"}) return d.Name
+Output :
+d.Name
+"Dr.Aarohi"
+"Dr.Vikas"
+3.c
+match(p:Person)-[:Recommends]->(h:Hospital)-[s:Specialized_in]->(ss:Specialization {Name:"Gynaec"}) 
+with h.Name as names, count(h.Name) as count_vt WITH collect({names:names,count_vt:count_vt}) as 
+rows,max(count_vt) as max UNWIND [row in rows WHERE row.count_vt=max] as row 
+RETURN row.names,row.count_vt as count_vt
+Output :
+	row.names			count_vt
+"Jehangir Hospital"	2
+3.d
+match (p:Person)-[r:Rates]-(h:Hospital {Name:"Jehangir Hospital"}) where r.Rating>=3 return p.Name
+Output :
+p.Name
+"Diya"
+"Vishal"
