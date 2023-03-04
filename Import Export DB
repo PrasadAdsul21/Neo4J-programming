@@ -1,0 +1,91 @@
+Import Export
+
+
+
+
+NODES
+
+COUNTRY
+create (c:Country{Name:"India"}) return c;
+create (c:Country{Name:"USA"}) return c;
+create (c:Country{Name:"Israil"}) return c;
+create (c:Country{Name:"Arab"}) return c;
+create (c:Country{Name:"Europe"}) return c;
+
+STATES
+create (s:States{Name:"Maharashtra"}) return s;
+create (s:States{Name:"Punjab"}) return s;
+create (s:States{Name:"California"}) return s;
+create (s:States{Name:"Liverpool"}) return s;
+
+PRODUCT
+create (p:Product{Name:"Wheat",production:75}) return p;
+create (p:Product{Name:"Oil",production:90}) return p;
+create (p:Product{Name:"Sugar",production:50}) return p;
+create (p:Product{Name:"GroundNuts",production:50}) return p;
+create (p:Product{Name:"Cotton",production:50}) return p;
+
+
+RELATIONSHIPS
+
+Has_States  and Produces
+match (c:Country),(s:States),(p:Product) where c.Name="India" and s.Name="Maharashtra" and
+p.Name="Wheat" create (c)-[:has_States]->(s)-[:Produces {Production:80}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="USA" and s.Name="California" and
+p.Name="Oil" create (c)-[:has_States]->(s)-[:Produces {Production:57}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="India" and s.Name="Maharashtra" and
+p.Name="Oil" create (c)-[:has_States]->(s)-[:Produces {Production:60}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="India" and s.Name="Maharashtra" and
+p.Name="GroundNuts" create (c)-[:has_States]->(s)-[:Produces {Production:45}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="India" and s.Name="Punjab" and
+p.Name="Sugar" create (c)-[:has_States]->(s)-[:Produces {Production:50}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="India" and s.Name="Liverpool" and
+p.Name="Sugar" create (c)-[:has_States]->(s)-[:Produces {Production:78}]->(p) return c,s,p;
+
+match (c:Country),(s:States),(p:Product) where c.Name="USA" and s.Name="California" and
+p.Name="Sugar" create (c)-[:has_States]->(s)-[:Produces {Production:90}]->(p) return c,s,p;
+
+Imports
+match(c:Country),(p:Product) where c.Name="USA" and
+p.Name="Oil" create (c)-[:Imports]->(p) return c,p
+
+match(c:Country),(p:Product) where c.Name="India" and
+p.Name="Wheat" create (c)-[:Imports]->(p) return c,p
+
+match(c:Country),(p:Product) where c.Name="Europe" and
+p.Name="Sugar" create (c)-[:Imports]->(p) return c,p
+
+
+QUERIES
+3.a
+match(c:Country)-[r1:has_States]->(s:States),(s:States)-[r2:Produces]->(p:Product {Name:"Oil"}) 
+return DISTINCT c.Name
+Output :
+c.Name
+"India"
+"USA"
+3.b
+match(s:States {Name:"Maharashtra"})-[r:Produces]->(pr:Product) return pr.Name
+Output :
+pr.Name
+"GroundNuts"
+"Oil"
+"Wheat"
+3.c
+match(c:Country)-[r1:has_States]->(s:States),
+(s:States)-[r2:Produces]->(p:Product {Name:"Sugar"})WHERE r2.Production>70 return DISTINCT c.Name
+Output :
+    c.Name
+"USA"
+"India"
+3.d
+match (c:Country) WHERE NOT (c)-[:Imports]->(:Product) return c.Name
+Output :
+c.Name
+"Israil"
+"Arab"
