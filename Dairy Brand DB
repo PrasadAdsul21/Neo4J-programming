@@ -1,0 +1,101 @@
+Dairy Brand
+
+
+NODES
+Brand
+create(b:Brand{Name:"Gokul",Popularity:"95%"}) return b;
+create(b:Brand{Name:"Britannia",Popularity:"45%"}) return b;
+create(b:Brand{Name:"Amul",Popularity:"75%"}) return b;
+
+Product
+create(p:Product{Name:"Cheese"}) return p;
+create(p:Product{Name:"Curd"}) return p;
+create(p:Product{Name:"Milk"}) return p;
+create(p:Product{Name:"Butter"}) return p;
+
+Category
+create(c:Category{Name:"Low Fat"}) return c;
+create(c:Category{Name:"Medium Fat"}) return c;
+create(c:Category{Name:"Medium Fat"}) return c;
+create(c:Category{Name:"High Fat"}) return c;
+
+Region
+create(r:Region {Name:"Maharashtra"}) return r;
+create(r:Region {Name:"Gujarat"}) return r;
+create(r:Region {Name:"UP"}) return r;
+
+
+RELATIONSHIPS
+
+Has_Product
+match(b:Brand),(p:Product) where b.Name="Amul" and
+p.Name="Cheese" create (b)-[:Has_Product]->(p) return b,p;
+
+match(b:Brand),(p:Product) where b.Name="Gokul" and
+p.Name="Milk" create (b)-[:Has_Product]->(p) return b,p;
+
+match(b:Brand),(p:Product) where b.Name="Britannia" and
+p.Name="Cheese" create (b)-[:Has_Product]->(p) return b,p;
+
+match(b:Brand),(p:Product) where b.Name="Gokul" and
+p.Name="Cheese" create (b)-[:Has_Product]->(p) return b,p
+
+Has_Category
+match(p:Product),(c:Category) where p.Name="Curd" and
+c.Name="Medium Fat" create (p)-[:Has_Category]->(c) return p,c;
+
+match(p:Product),(c:Category) where p.Name="Milk" and
+c.Name="Low Fat" create (p)-[:Has_Category]->(c) return p,c;
+
+match(p:Product),(c:Category) where p.Name="Cheese" and
+c.Name="High Fat" create (p)-[:Has_Category]->(c) return p,c;
+
+
+
+
+Popular_In
+match(b:Brand),(r:Region) where b.Name="Amul" and
+r.Name="Maharashtra" create (b)-[:Popular_In {Popularity:45}]->(r) return b,r;
+
+match(b:Brand),(r:Region) where b.Name="Gokul" and
+r.Name="Maharashtra" create (b)-[:Popular_In {Popularity:79}]->(r) return b,r;
+
+match(b:Brand),(r:Region) where b.Name="Amul" and
+r.Name="UP" create (b)-[t:Popular_In {Popularity:90}]->(r) return b,r;
+match(b:Brand),(r:Region) where b.Name="Britannia" and
+r.Name="Maharashtra" create (b)-[:Popular_In {Popularity:34}]->(r) return b,r;
+
+match(b:Brand),(r:Region) where b.Name="Britannia" and
+r.Name="Gujarat" create (b)-[:Popular_In {Popularity:89}]->(r) return b,r;
+
+match(b:Brand),(r:Region) where b.Name="Gokul" and
+r.Name="Gujarat" create (b)-[:Popular_In {Popularity:61}]->(r) return b,r;
+
+
+
+QUERIES
+
+3.a
+MATCH (b:Brand) return b.Name as Brand_Names
+Output : 
+Brand_Names
+"Gokul"
+"Britannia"
+"Amul"
+3.b
+match(b:Brand)-[r:Popular_In]->(r1:Region {Name:"Maharashtra"}) WHERE r.Popularity>70 return b.Name
+Output :
+b.Name
+"Gokul"
+3.c
+match(b:Brand)-[r:Has_Product]->(c:Product {Name:"Cheese"}),
+(b:Brand)-[p:Popular_In]->(r1:Region {Name:"Gujarat"}) WHERE p.Popularity>80 return b.Name
+Output :
+b.Name
+"Britannia"
+3.d
+match(b:Brand)-[r:Has_Product]->(c:Product {Name:"Milk"}),
+(p2:Product)-[p:Has_Category]->(r1:Category {Name:"Low Fat"}) return b.Name
+Output :
+b.Name
+"Gokul"
