@@ -1,0 +1,93 @@
+Society – HCL
+NODES
+Person
+create(p:Person{Name:"Tushar",Age:24}) return p;
+create(p:Person{Name:"Ganesh",Age:45}) return p;
+create(p:Person{Name:"Amar",Age:26}) return p;
+create(p:Person{Name:"Lata",Age:77}) return p;
+create(p:Person{Name:"Shanti",Age:80}) return p;
+
+Project
+create(p:Project{Name:"Finance Project"}) return p;
+create(p:Project{Name:"Sales Project"}) return p;
+create(p:Project{Name:"Marketing Project"}) return p;
+ 
+Sister
+create(s:Sister{Name:"Sanskruti"}) return s;
+
+Brother
+create(b:Brother{Name:"Vinay"}) return b;
+
+Children
+create(c:Children{Name:"Amit"}) return c;
+
+Location
+create(l:Location{Name:"Pune"}) return l;
+create(l:Location{Name:"Mumbai"}) return l;
+create(l:Location{Name:"Kolhapur"}) return l;
+
+
+RELATIONSHIPS
+Works_in
+match(p:Person),(p1:Project) where p.Name="Tushar" and 
+p1.Name="Finance Project" create (p)-[:Works_in]->(p1) return p,p1;
+
+match(p:Person),(p1:Project) where p.Name="Ganesh" and
+ p1.Name="Finance Project" create (p)-[:Works_in]->(p1) return p,p1;
+
+match(p:Person),(p1:Project) where p.Name="Amar" and
+ p1.Name="Sales Project" create (p)-[:Works_in]->(p1) return p,p1;
+
+Friend_of
+match(p:Person),(p1:Person) where p.Name="Tushar" and
+ p1.Name="Ganesh" create (p)-[:Friend_of]->(p1) return p,p1;
+
+match(p:Person),(p1:Person) where p.Name="Ganesh" and
+ p1.Name="Amar" create (p)-[:Friend_of]->(p1) return p,p1;
+
+Brother_of
+match(p:Person),(b:Brother) where p.Name="Ganesh" and
+b.Name="Vinay" create (p)-[:Brother_of]->(b) return p,b;
+
+Parent_of
+match(p:Person),(c:Children) where p.Name="Ganesh" and 
+c.Name="Amit" create (p)-[:Parent_of]->(c) return p,c;
+
+Grandmother_of
+match(p:Person),(c:Children) where p.Name="Lata" and 
+c.Name="Amit" create (p)-[:Grandmother_of]->(c) return p,c;
+
+Stays_in
+match(p:Person),(l:Location) where p.Name="Ganesh" and
+l.Name="Pune" create (p)-[:Stays_in]->(l) return p,l;
+
+match(p:Person),(l:Location) where p.Name="Tushar" and
+l.Name="Mumbai" create (p)-[:Stays_in]->(l) return p,l;
+
+match(p:Person),(l:Location) where p.Name="Amar" and
+l.Name="Mumbai" create (p)-[:Stays_in]->(l) return p,l;
+
+
+
+QUERIES
+3.a
+match(p:Person),(l:Children)where(p)-[:Parent_of]->(l) return p.Name;
+Output:
+Parent
+"Ganesh"
+3.b 
+match(p:Person),(l:Projectn)where l.Name="Finance Project" and (p)-[:Works_in]->(l) return p.Name;
+Output:
+	p.Name
+"Tushar"
+"Ganesh"
+3.c
+match(n:Person)-[r4:Friend_of]->(m:Person) return max(n)
+Output :
+	Ganesh
+3.d
+match(p:Person)-[:Grandmother_of]->(l) return p.Name;
+Output :
+p.Name
+"Lata"
+"Shanti"
