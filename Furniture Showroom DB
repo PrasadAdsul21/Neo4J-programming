@@ -1,0 +1,113 @@
+Furniture Showroom
+
+
+NODES
+Furniture
+create(f:Furniture{Name:"Sofa Set", color:"white"}) return f;
+create(f:Furniture{Name:"Tea Table", color:"Black"}) return f;
+create(f:Furniture{Name:"Cupboards", color:"Brown"}) return f;
+create(f:Furniture{Name:"beds", color:"white"}) return f;
+create(f:Furniture{Name:"Dining Table", color:"Black"}) return f;
+
+FTypes
+create(f:FTypes {Type:”Fast Moving”) return f;
+create(f:FTypes {Type:"Heavy"}) return f;
+create(f:FTypes {Type:"Fragile"}) return f;
+create(f:FTypes {Type:"Light Weight"}) return f;
+
+Staff
+create(s:Staff{Name:"Satish"}) return s;
+create(s:Staff{Name:"Suraj"}) return s;
+create(s:Staff{Name:"Omkar"}) return s;
+create(s:Staff{Name:"Pratik"}) return s;
+
+Customer
+create(c:Customer{Name:"Priyanshu"}) return c;
+create(c:Customer{Name:"Sahil"}) return c;
+create(c:Customer{Name:"Anita"}) return c;
+create(c:Customer{Name:"Riya"}) return c;
+
+
+
+RELATIONSHIPS
+
+Handled
+match(s:Staff),(f:Furniture) where s.Name="Satish" and
+f.Name="Sofa Set" create (s)-[:Handled]->(f) return s,f;
+
+match(s:Staff),(f:Furniture) where s.Name="Suraj" and
+f.Name="Tea Table" create (s)-[:Handled]->(f) return s,f;
+
+match(s:Staff),(f:Furniture) where s.Name="Omkar" and 
+f.Name="Cupboards" create (s)-[:Handled]->(f) return s,f;
+
+match(s:Staff),(f:Furniture) where s.Name="Pratik" and
+f.Name="beds" create (s)-[:Handled]->(f) return s,f;
+
+Enquired_about
+match(c:Customer),(f:Furniture) where c.Name="Sahil" and
+f.Name="Sofa Set" create (c)-[:Enquired_about]->(f) return c,f;
+
+match(c:Customer),(f:Furniture) where c.Name="Priyanshu" and
+f.Name="Dining Table" create (c)-[:Enquired_about]->(f) return c,f;
+
+match(c:Customer),(f:Furniture) where c.Name="Anita" and
+f.Name="beds" create (c)-[:Enquired_about]->(f) return c,f;
+
+
+
+
+Purchased
+match(c:Customer),(f:Furniture) where c.Name="Sahil" and
+f.Name="Sofa Set" create (c)-[:Purchased]->(f) return c,f;
+
+match(c:Customer),(f:Furniture) where c.Name="Riya" and
+f.Name="Tea Table" create (c)-[:Purchased]->(f) return c,f;
+
+match(c:Customer),(f:Furniture) where c.Name="Priyanshu" and
+f.Name="Dining Table" create (c)-[:Purchased]->(f) return c,f;
+
+Have_Type
+match(f:Furniture),(ft:FTypes) where f.Name="beds" and
+ft.Type="Heavy" create (f)-[: Have_Type]->(ft) return f,ft;
+
+match(f:Furniture),(ft:FTypes) where f.Name="Tea Table" and
+ft.Type="Fragile" create (f)-[: Have_Type]->(ft) return f,ft;
+
+match(f:Furniture),(ft:FTypes) where f.Name="Dining Table" and
+ft.Type="Light Weight" create (f)-[: Have_Type]->(ft) return f,ft;
+
+match(f:Furniture),(ft:FTypes) where f.Name="Dining Table" and
+ft.Type="Fast Moving" create (f)-[: Have_Type]->(ft) return f,ft;
+
+match(f:Furniture),(ft:FTypes) where f.Name="Cupboards" and
+ft.Type="Fast Moving" create (f)-[: Have_Type]->(ft) return f,ft;
+
+
+QUERIES
+3.a
+MATCH (f:Furniture) return f.Name as Furniture
+Output :
+Furniture
+"Sofa Set"
+"Tea Table"
+"Cupboards"
+"beds"
+"Dining Table"
+3.b
+match(f:Furniture),(s:Staff) where s.Name="Satish" and (s)-[:Handled]->(f) return f.Name;
+Output :
+f.Name
+"Sofa Set"
+3.c
+match (c:Customer) WHERE (c)-[:Enquired_about]->(:Furniture) AND NOT 
+(c)-[:Purchased]->(:Furniture)return c.Name
+Output :
+	c.Name
+"Anita"
+3.d
+match (f:Furniture) WHERE (f)-[:Have_Type]->(:FTypes {Type:"Fast Moving"}) return f.Name
+Output :
+f.Name
+"Cupboards"
+"Dining Table"
