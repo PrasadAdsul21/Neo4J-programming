@@ -1,0 +1,96 @@
+University
+
+
+NODES
+
+University
+create(u:University{Name:"Pune University"}) return u;
+
+Department
+create(d:Department{Name:"Chemistry"}) return d;
+create(d:Department{Name:"Zoology"}) return d;
+create(d:Department{Name:"Computer Science"}) return d;
+
+Course
+create(c:Course{Name:"BSc"}) return c;
+create(c:Course{Name:"MSc"}) return c;
+create(c:Course{Name:"Diploma"}) return c;
+
+Person
+create(c:Person{Name:"Seema"}) return c;
+create(c:Person{Name:"Prashant"}) return c;
+create(c:Person{Name:"Mansi"}) return c;
+
+
+RELATIONSHIPS
+
+has
+match (u:University),(d:Department) where d.Name="Chemistry" and u.Name="Pune University" create (u)-[:has]->(d) return u,d;
+
+match (u:University),(d:Department) where d.Name="Zoology" and u.Name="Pune University" create (u)-[:has]->(d) return u,d;
+
+match (u:University),(d:Department) where d.Name="Computer Science" and u.Name="Pune University" create (u)-[:has]->(d) return u,d;
+
+conducts
+match (c:Course),(d:Department) where c.Name="MSc" and d.Name="Chemistry" create (d)-[:conducts]->(c) return d,c;
+
+match (c:Course),(d:Department) where c.Name="BSc" and d.Name="Chemistry" create (d)-[:conducts]->(c) return d,c;
+
+match (c:Course),(d:Department) where c.Name="Diploma" and d.Name="Zoology" 
+create (d)-[:conducts]->(c) return d,c;
+
+match (c:Course),(d:Department) where c.Name="Diploma" and d.Name="Chemistry" 
+create (d)-[:conducts]->(c) return d,c;
+
+match (c:Course),(d:Department) where c.Name="BSc" and d.Name="Computer Science" 
+create (d)-[:conducts]->(c) return d,c;
+
+
+match (c:Course),(d:Department) where c.Name="MSc" and d.Name="Computer Science" 
+create (d)-[:conducts]->(c) return d,c;
+
+Recommends
+match (c:Course),(p:Person) where c.Name="MSc" and p.Name="Mansi" 
+create (p)-[:Recommends]->(c) return p,c;
+
+match (c:Course),(p:Person) where c.Name="BSc" and p.Name="Mansi" 
+create (p)-[:Recommends]->(c) return p,c;
+
+match (c:Course),(p:Person) where c.Name="MSc" and p.Name="Seema" 
+create (p)-[:Recommends]->(c) return p,c;
+
+match (c:Course),(p:Person) where c.Name="MSc" and p.Name="Prashant" 
+create (p)-[:Recommends]->(c) return p,c;
+
+
+QUERIES
+3.a
+match (c:Course),(d:Department) where d.Name="Chemistry" and (d)-[:conducts]->(c) return c.Name;
+Output :
+	c.Name
+"BSc"
+"MSc"
+"Diploma"
+3.b
+match (u:University),(d:Department) where u.Name="Pune University" create (u)-[:has]->(d) return d.Name;
+Output :
+d.Name
+"Chemistry"
+"Zoology"
+"Computer Science"
+3.c
+match (d1:Department {Name:"Chemistry"})-[:conducts]->(c:Course),(d2:Department {Name:"Zoology"})-[:conducts]->(c) RETURN c.Name
+Output :
+c.Name
+"Diploma"
+
+
+
+
+3.d
+match(p:Person)-[:Recommends]->(d:Course)<-[s:conducts]->(ss:Department {Name:"Computer Science"}) 
+with d.Name as names, count(d.Name) as count_vt WITH collect({names:names,count_vt:count_vt}) as rows,max(count_vt) as max UNWIND 
+[row in rows WHERE row.count_vt=max] as row RETURN row.names,row.count_vt as count_vt
+Output :
+row.names		count_vt
+"MSc"			  3
