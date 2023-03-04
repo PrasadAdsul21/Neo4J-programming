@@ -1,0 +1,81 @@
+Hotel
+
+
+NODES
+Person
+Create(p:Person {Name:"Seeta"}) return p
+Create(p:Person {Name:"Riya"}) return p
+Create(p:Person {Name:"Rohan"}) return p
+
+Hotel
+create (h:Hotel {Name:"Marriotte", location:"Camp",rating:4}) return h;
+create (h:Hotel {Name:"Ritz", location:"Camp",rating:5}) return h;
+create (h:Hotel {Name:"Blue Diamond", location:"KP Road",rating:3}) return h;
+create (h:Hotel {Name:"Radison", location:"Kharadi",rating:5}) return h;
+create (h:Hotel {Name:"Madison", location:"Koregaon Park",rating:3.5}) return h;
+create (h:Hotel {Name:"Bowry", location:"Koregaon Park",rating:3.7}) return h;
+
+Facility
+create (f:Facility {Name:"Lodging"}) return f;
+create (f:Facility {Name:"Restaurant"}) return f;
+create (f:Facility {Name: "Lodging Restaurant"}) return f;
+
+
+
+
+
+
+RELATIONSHIPS
+
+Has
+match (h:Hotel),(f:Facility) where h.Name="Blue Diamond" and f.Name="Lodging" create (h)-[:Has]->(f) return h,f;
+
+match (h:Hotel),(f:Facility) where h.Name="Radison" and f.Name="Restaurant" create (h)-[:Has]->(f) return h,f;
+match (h:Hotel),(f:Facility) where h.Name="Ritz" and f.Name="Lodging Restaurant" create (h)-[:Has]->(f) return h,f;
+
+match (h:Hotel),(f:Facility) where h.Name="Marriotte" and f.Name="Lodging Restaurant" create (h)-[:Has]->(f) return h,f;
+
+Recommends
+match (p:Person),(h:Hotel) where h.Name="Bowry" and p.Name="Seeta" create (p)-[:Recommends]->(h) return p,h
+
+match (p:Person),(h:Hotel) where h.Name="Madison" and p.Name="Seeta" create (p)-[:Recommends]->(h) return p,h
+
+match (p:Person),(h:Hotel) where h.Name="Madison" and p.Name="Riya" create (p)-[:Recommends]->(h) return p,h
+
+match (p:Person),(h:Hotel) where h.Name="Madison" and p.Name="Rohan" create (p)-[:Recommends]->(h) return p,h
+
+
+
+
+
+QUERIES
+3.a
+match (h:Hotel) where h.location="Camp" return h.Name;
+Output :
+h.Name
+"Marriotte"
+"Ritz"
+
+3.b
+match (h:Hotel),(f:Facility) where f.Name="Lodging Restaurant" and (h)-[:Has]->(f) return h.Name;
+Output :
+h.Name
+"Marriotte"
+"Ritz"
+3.c
+match (h:Hotel) where h.rating>=4 return h.Name
+Output :
+h.Name
+"Marriotte"
+"Ritz"
+"Radison"
+
+3.d
+match(p:Person)-[:Recommends]->(h:Hotel {location:"Koregaon Park"}) 
+with h.Name as names, count(h.Name) as count_vt WITH collect({names:names,count_vt:count_vt}) 
+as rows,max(count_vt) as max UNWIND [row in rows WHERE row.count_vt=max] as row 
+RETURN row.names,row.count_vt as count_vt
+
+Output :
+row.names		count_vt
+"Madison"		3
