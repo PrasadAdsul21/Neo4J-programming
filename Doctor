@@ -1,0 +1,78 @@
+Doctor
+
+
+NODES
+
+Streams
+create (s:Streams {Name:"Pediatric"}) return s;
+create (s:Streams {Name:"Heart Specialist"}) return s;
+create (s:Streams {Name:"Gynaec"}) return s;
+create (s:Streams {Name:"Neurosurgery"}) return s;
+
+Doctor
+create (d:Doctor {Name:"Dr.Aarohi",Type:"PersonalClinic",Area:"Kothrud"}) return d;
+create (d:Doctor {Name:"Dr.Rohit",Type:"VisitingDoctor",Area:"Kothrud"}) return d;
+create (d:Doctor {Name:"Dr.Kulkarni",Type:"PersonalClinic",Area:"Camp"}) return d;
+create (d:Doctor {Name:"Dr.Krishna",Type:"VisitingDoctor",Area:"Dehu"}) return d;
+
+Person
+create (p:Person {Name:"Vishal"}) return p;
+create (p:Person {Name:"Swaraj"}) return p;
+create (p:Person {Name:"Rama"}) return p;
+
+
+RELATIONSHIPS
+
+Recommends
+match(p:Person),(d:Doctor) where p.Name="Vishal" and d.Name="Dr.Rohit" create(p)-[r:Recommends]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Vishal" and d.Name="Dr.Kulkarni" create(p)-[r:Recommends]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Rama" and d.Name="Dr.Rohit" create(p)-[r:Recommends]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Swaraj" and d.Name="Dr.Rohit" create(p)-[r:Recommends]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Swaraj" and d.Name="Dr.Aarohi" create(p)-[r:Recommends]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Rama" and d.Name="Dr.Aarohi" create(p)-[r:Recommends]->(d) return p,d
+
+Reviews
+match(p:Person),(d:Doctor) where p.Name="Swaraj" and d.Name="Dr.Aarohi" create(p)-[r:Reviews {Review:"Very Attentive!"}]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Rama" and d.Name="Dr.Kulkarni" create(p)-[r:Reviews {Review: "Very Attentive!"}]->(d) return p,d
+
+match(p:Person),(d:Doctor) where p.Name="Vishal" and d.Name="Dr.Kulkarni" create(p)-[r:Reviews {Review: "Understanding and with great knowledge!"}]->(d) return p,d
+
+Is_Of
+match(d:Doctor),(s:Streams) where d.Name="Dr.Aarohi" and s.Name="Gynaec" create (d)-[:Is_Of]->(s) return d,s;
+match(d:Doctor),(s:Streams) where d.Name="Dr.Kulkarni" and s.Name="Pediatric" create (d)-[:Is_Of]->(s) return d,s;
+match(d:Doctor),(s:Streams) where d.Name="Dr.Rohit" and s.Name="Gynaec" create (d)-[:Is_Of]->(s) return d,s;
+match(d:Doctor),(s:Streams) where d.Name="Dr.Krishna" and s.Name="Neurosurgery" create (d)-[:Is_Of]->(s) return d,s;
+
+
+QUERIES
+3.a
+match(d:Doctor)-[:Is_Of]->(s:Streams {Name:"Pediatric"}) WHERE d.Area="Camp" return d.Name
+Output :
+d.Name
+"Dr.Kulkarni"
+3.b
+match(d:Doctor) where d.Type="Personal Clinic" return d.Name
+Output :
+		d.Name
+"Dr.Aarohi"
+"Dr.Kulkarni"
+3.c
+match(p:Person)-[:Recommends]->(d:Doctor {Area:"Kothrud"})-[s:Is_Of]->(ss:Streams {Name:"Gynaec"})
+with d.Name as names, count(d.Name) as count_vt WITH collect({names:names,count_vt:count_vt}) as rows,
+max(count_vt) as max UNWIND [row in rows WHERE row.count_vt=max] as row RETURN row.names,
+row.count_vt as count_vt
+Output :
+row.names		count_vt
+"Dr.Rohit"		3
+3.d
+match(p:Person)-[r:Reviews]->(d:Doctor {Name:"Dr.Kulkarni"}) return r.Review
+Output :
+r.Review
+"Understanding and with great knowledge!"
+"Very Attentive!"
