@@ -1,0 +1,81 @@
+Automobile
+
+
+NODES
+
+Industry
+create(i:Industry{Name:"KTM"})return i;
+
+VehicleType
+create(v:VehicleType{Name:"Heavy"})return v;
+create(v:VehicleType{Name:"Light"})return v;
+
+VehicleChar
+create(vv:VehicleChar{Name:"Duke",color:"Orange",wheels:"two wheeler"})return vv;
+create(vv:VehicleChar{Name:"RC",color:"White",wheels:"two wheeler"})return vv;
+
+Customer
+create(c:Customer {Name:"Shivani"}) return c;
+create(c:Customer {Name:"Pooja"}) return c;
+create(c:Customer {Name:"Ajay"}) return c;
+
+
+RELATIONSHIPS
+
+Has
+match(i:Industry),(v:VehicleType) where i.Name="KTM" and v.Name="Heavy" create(i)-[:Has]->(v) return i,v;
+
+match(i:Industry),(v:VehicleType) where i.Name="KTM" and v.Name="Light" create(i)-[:Has]->(v) return i,v;
+
+
+has_char
+match(v:VehicleType),(vv:VehicleChar) where v.Name="Heavy" and vv.Name="Duke" create (v)-[:has_char]->(vv) return vv,v;
+
+match(v:VehicleType),(vv:VehicleChar) where v.Name="Light" and vv.Name="RC" create (v)-[:has_char]->(vv) return vv,v;
+
+
+Bought
+match(c:Customer),(v:VehicleType) where c.Name="Shivani" and v.Name="Light" create (c)-[:Bought]->(v) return c,v;
+
+match(c:Customer),(v:VehicleType) where c.Name="Shivani" and v.Name="Heavy" create (c)-[:Bought]->(v) return c,v;
+
+match(c:Customer),(v:VehicleType) where c.Name="Pooja" and v.Name="Light" create (c)-[:Bought]->(v) return c,v;
+
+
+Recommends
+match(c:Customer),(v:VehicleType) where c.Name="Pooja" and v.Name="Light" create (c)-[: Recommends]->(v) return c,v;
+
+match(c:Customer),(v:VehicleType) where c.Name="Shivani" and v.Name="Light" create (c)-[: Recommends]->(v) return c,v;
+
+match(c:Customer),(v:VehicleType) where c.Name="Ajay" and v.Name="Light" create (c)-[: Recommends]->(v) return c,v;
+
+match(c:Customer),(v:VehicleType) where c.Name="Ajay" and v.Name="Heavy" create (c)-[: Recommends]->(v) return c,v;
+
+
+
+QUERIES
+3.a
+match(v:VehicleType),(vv:VehicleChar) where v.Name="Heavy" and (v)-[:has_char]->(vv) return vv.Name,
+vv.color,vv.wheels;
+Output :
+vv.Name		vv.color		vv.wheels
+"Duke"		"Orange"		"two wheeler"
+3.b
+match(c:Customer),(v:VehicleType) where v.Name="Light " and (c)-[:Bought]->(v) return c.Name;
+Output :
+c.Name
+"Shivani"
+"Pooja"
+3.c
+match(p:Customer)-[b:Bought]->(v:VehicleType) with p, count(b)  as cnt where cnt>1 return p.Name
+Output :
+p.Name
+"Shivani"
+
+3.d
+match(p:Customer)-[:Recommends]->(d:VehicleType) with d.Name as names, count(d.Name) as count_vt 
+WITH collect({names:names,count_vt:count_vt}) as rows,max(count_vt) as max 
+UNWIND [row in rows WHERE row.count_vt=max] as row RETURN row.names,row.count_vt as count_vt
+Output :
+	row.names		count_vt
+  "Light "		3
